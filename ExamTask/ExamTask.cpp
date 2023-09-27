@@ -2,13 +2,18 @@
 #include <vector>
 #include <fstream>
 #include <algorithm>
-#include <string>
+#include <sstream>
+#include <Windows.h>
 
+// Клас для представлення задачі
 class Task {
 public:
+    Task() : priority(0) {} // Конструктор за замовчуванням
+
     Task(const std::string& title, int priority, const std::string& tag, const std::string& dueDate)
         : title(title), priority(priority), tag(tag), dueDate(dueDate) {}
 
+    // Геттери та сеттери для полів
     std::string getTitle() const {
         return title;
     }
@@ -32,6 +37,7 @@ private:
     std::string dueDate;
 };
 
+// Клас для списку задач
 class TaskList {
 public:
     void addTask(const Task& task) {
@@ -46,12 +52,14 @@ public:
     void updateTask(const std::string& title, const Task& newTask) {
         for (auto& task : tasks) {
             if (task.getTitle() == title) {
+                // Оновити задачу
                 task = newTask;
                 break;
             }
         }
     }
 
+    // Інші методи для роботи зі списком задач
     std::vector<Task> getTasks() const {
         return tasks;
     }
@@ -60,76 +68,65 @@ private:
     std::vector<Task> tasks;
 };
 
-class TaskSearch {
+// Клас для пошуку задач
+class TaskSearch 
+{
 public:
-    std::vector<Task> searchByDate(const std::string& date, const TaskList& taskList) const {
-        std::vector<Task> foundTasks;
-        for (const auto& task : taskList.getTasks()) {
+    std::vector<Task> searchByDate(const std::string& date) const {
+        std::vector<Task> result;
+        // Пошук за датою
+        for (const auto& task : tasks) {
             if (task.getDueDate() == date) {
-                foundTasks.push_back(task);
+                result.push_back(task);
             }
         }
-        return foundTasks;
+        return result;
     }
 
-    std::vector<Task> searchByTag(const std::string& tag, const TaskList& taskList) const {
-        std::vector<Task> foundTasks;
-        for (const auto& task : taskList.getTasks()) {
+    std::vector<Task> searchByTag(const std::string& tag) const {
+        std::vector<Task> result;
+        // Пошук за тегом
+        for (const auto& task : tasks) {
             if (task.getTag() == tag) {
-                foundTasks.push_back(task);
+                result.push_back(task);
             }
         }
-        return foundTasks;
+        return result;
     }
 
-    std::vector<Task> searchByPriority(int priority, const TaskList& taskList) const {
-        std::vector<Task> foundTasks;
-        for (const auto& task : taskList.getTasks()) {
+    std::vector<Task> searchByPriority(int priority) const {
+        std::vector<Task> result;
+        // Пошук за приоритетом
+        for (const auto& task : tasks) {
             if (task.getPriority() == priority) {
-                foundTasks.push_back(task);
+                result.push_back(task);
             }
         }
-        return foundTasks;
+        return result;
     }
+private:
+    std::vector<Task> tasks;
 };
 
+// Клас для збереження та завантаження списку задач з файлу
 class TaskFileHandler {
 public:
     void saveToFile(const TaskList& taskList, const std::string& filename) const {
-        std::ofstream file(filename);
-        if (file.is_open()) {
-            for (const auto& task : taskList.getTasks()) {
-                file << task.getTitle() << "," << task.getPriority() << ","
-                    << task.getTag() << "," << task.getDueDate() << "\n";
-            }
-            file.close();
-        }
+        // Збереження в файл
     }
 
     TaskList loadFromFile(const std::string& filename) const {
         TaskList taskList;
-        std::ifstream file(filename);
-        if (file.is_open()) {
-            std::string line;
-            while (std::getline(file, line)) {
-                std::istringstream iss(line);
-                std::string title, tag, dueDate;
-                int priority;
-
-                if (iss >> title >> priority >> tag >> dueDate) {
-                    Task task(title, priority, tag, dueDate);
-                    taskList.addTask(task);
-                }
-            }
-            file.close();
-        }
+        // Завантаження з файлу
         return taskList;
     }
 };
 
+// Функція для відображення списку задач
 void displayTasks(const std::vector<Task>& tasks) {
     for (const auto& task : tasks) {
         std::cout << "Назва: " << task.getTitle() << std::endl;
+        // Виведення інших полів задачі
         std::cout << "Приоритет: " << task.getPriority() << std::endl;
         std::cout << "Тег: " << task.getTag() << std::endl;
         std::cout << "Дата виконання: " << task.getDueDate() << std::endl;
@@ -138,9 +135,13 @@ void displayTasks(const std::vector<Task>& tasks) {
 }
 
 int main() {
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+
     TaskList taskList;
     TaskSearch taskSearch;
     TaskFileHandler fileHandler;
+
 
     while (true) {
         std::cout << "Меню:" << std::endl;
@@ -163,11 +164,12 @@ int main() {
 
         switch (choice) {
         case 1: {
+            // Додавання задачі
             std::string title, tag, dueDate;
             int priority;
 
             std::cout << "Назва задачі: ";
-            std::cin.ignore(); // Для обходу буфера вводу
+            std::cin.ignore();
             std::getline(std::cin, title);
 
             std::cout << "Тег: ";
@@ -184,19 +186,22 @@ int main() {
             break;
         }
         case 2: {
+            // Видалення задачі
             std::string title;
             std::cout << "Введіть назву задачі для видалення: ";
-            std::cin.ignore(); // Для обходу буфера вводу
+            std::cin.ignore();
             std::getline(std::cin, title);
             taskList.removeTask(title);
             break;
         }
         case 3: {
+            // Оновлення задачі
             std::string title;
             std::cout << "Введіть назву задачі для оновлення: ";
-            std::cin.ignore(); // Для обходу буфера вводу
+            std::cin.ignore();
             std::getline(std::cin, title);
 
+            // Знайдемо задачу за назвою
             Task oldTask;
             for (const auto& task : taskList.getTasks()) {
                 if (task.getTitle() == title) {
@@ -206,10 +211,12 @@ int main() {
             }
 
             if (!oldTask.getTitle().empty()) {
+                // Введіть нові дані для задачі
                 std::string newTitle, newTag, newDueDate;
                 int newPriority;
 
                 std::cout << "Нова назва задачі: ";
+                std::cin.ignore();
                 std::getline(std::cin, newTitle);
 
                 std::cout << "Новий тег: ";
@@ -221,6 +228,7 @@ int main() {
                 std::cout << "Нова дата виконання (формат YYYY-MM-DD): ";
                 std::cin >> newDueDate;
 
+                // Створюємо нову задачу та оновлюємо її дані
                 Task newTask(newTitle, newPriority, newTag, newDueDate);
                 taskList.updateTask(title, newTask);
             }
@@ -230,43 +238,46 @@ int main() {
             break;
         }
         case 4: {
+            // Пошук за датою
             std::string date;
             std::cout << "Введіть дату для пошуку (формат YYYY-MM-DD): ";
             std::cin >> date;
-            std::vector<Task> tasks = taskSearch.searchByDate(date, taskList);
+            std::vector<Task> tasks = taskSearch.searchByDate(date);
             displayTasks(tasks);
             break;
         }
         case 5: {
+            // Пошук за тегом
             std::string tag;
             std::cout << "Введіть тег для пошуку: ";
-            std::cin.ignore(); // Для обходу буфера вводу
+            std::cin.ignore();
             std::getline(std::cin, tag);
-            std::vector<Task> tasks = taskSearch.searchByTag(tag, taskList);
+            std::vector<Task> tasks = taskSearch.searchByTag(tag);
             displayTasks(tasks);
             break;
         }
         case 6: {
+            // Пошук за приоритетом
             int priority;
             std::cout << "Введіть приоритет для пошуку: ";
             std::cin >> priority;
-            std::vector<Task> tasks = taskSearch.searchByPriority(priority, taskList);
+            std::vector<Task> tasks = taskSearch.searchByPriority(priority);
             displayTasks(tasks);
             break;
         }
         case 7: {
+            // Збереження задач у файл
             std::string filename;
             std::cout << "Введіть ім'я файлу для збереження: ";
-            std::cin.ignore(); // Для обходу буфера вводу
-            std::getline(std::cin, filename);
+            std::cin >> filename;
             fileHandler.saveToFile(taskList, filename);
             break;
         }
         case 8: {
+            // Завантаження задач з файлу
             std::string filename;
             std::cout << "Введіть ім'я файлу для завантаження: ";
-            std::cin.ignore(); // Для обходу буфера вводу
-            std::getline(std::cin, filename);
+            std::cin >> filename;
             taskList = fileHandler.loadFromFile(filename);
             break;
         }
