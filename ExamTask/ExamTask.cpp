@@ -142,29 +142,29 @@ int main() {
     TaskSearch taskSearch;
     TaskFileHandler fileHandler;
 
-
     while (true) {
         std::cout << "Меню:" << std::endl;
-        std::cout << "1. Додати задачу" << std::endl;
+        std::cout << "1. Додати нову задачу" << std::endl;
         std::cout << "2. Видалити задачу" << std::endl;
         std::cout << "3. Оновити задачу" << std::endl;
-        std::cout << "4. Знайти задачу за датою" << std::endl;
-        std::cout << "5. Знайти задачу за тегом" << std::endl;
-        std::cout << "6. Знайти задачу за приоритетом" << std::endl;
-        std::cout << "7. Зберегти список задач у файл" << std::endl;
-        std::cout << "8. Завантажити список задач з файлу" << std::endl;
-        std::cout << "9. Вийти" << std::endl;
+        std::cout << "4. Показати всі задачі" << std::endl;
+        std::cout << "5. Пошук задачі за датою" << std::endl;
+        std::cout << "6. Пошук задачі за тегом" << std::endl;
+        std::cout << "7. Пошук задачі за приоритетом" << std::endl;
+        std::cout << "8. Зберегти список задач у файл" << std::endl;
+        std::cout << "9. Завантажити список задач з файлу" << std::endl;
+        std::cout << "0. Вийти" << std::endl;
 
         int choice;
         std::cin >> choice;
 
-        if (choice == 9) {
+        if (choice == 0) {
             break; // Вихід з програми
         }
 
         switch (choice) {
         case 1: {
-            // Додавання задачі
+            // Додавання нової задачі
             std::string title, tag, dueDate;
             int priority;
 
@@ -216,7 +216,6 @@ int main() {
                 int newPriority;
 
                 std::cout << "Нова назва задачі: ";
-                std::cin.ignore();
                 std::getline(std::cin, newTitle);
 
                 std::cout << "Новий тег: ";
@@ -238,7 +237,13 @@ int main() {
             break;
         }
         case 4: {
-            // Пошук за датою
+            // Показати всі задачі
+            std::vector<Task> tasks = taskList.getTasks();
+            displayTasks(tasks);
+            break;
+        }
+        case 5: {
+            // Пошук задачі за датою
             std::string date;
             std::cout << "Введіть дату для пошуку (формат YYYY-MM-DD): ";
             std::cin >> date;
@@ -246,8 +251,8 @@ int main() {
             displayTasks(tasks);
             break;
         }
-        case 5: {
-            // Пошук за тегом
+        case 6: {
+            // Пошук задачі за тегом
             std::string tag;
             std::cout << "Введіть тег для пошуку: ";
             std::cin.ignore();
@@ -256,8 +261,8 @@ int main() {
             displayTasks(tasks);
             break;
         }
-        case 6: {
-            // Пошук за приоритетом
+        case 7: {
+            // Пошук задачі за приоритетом
             int priority;
             std::cout << "Введіть приоритет для пошуку: ";
             std::cin >> priority;
@@ -265,7 +270,7 @@ int main() {
             displayTasks(tasks);
             break;
         }
-        case 7: {
+        case 8: {
             // Збереження задач у файл
             std::string filename;
             std::cout << "Введіть ім'я файлу для збереження: ";
@@ -273,7 +278,7 @@ int main() {
             fileHandler.saveToFile(taskList, filename);
             break;
         }
-        case 8: {
+        case 9: {
             // Завантаження задач з файлу
             std::string filename;
             std::cout << "Введіть ім'я файлу для завантаження: ";
