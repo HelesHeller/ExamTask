@@ -14,19 +14,23 @@ public:
         : title(title), priority(priority), tag(tag), dueDate(dueDate) {}
 
     // Геттери та сеттери для полів
-    std::string getTitle() const {
+    std::string getTitle() const 
+    {
         return title;
     }
 
-    int getPriority() const {
+    int getPriority() const 
+    {
         return priority;
     }
 
-    std::string getTag() const {
+    std::string getTag() const 
+    {
         return tag;
     }
 
-    std::string getDueDate() const {
+    std::string getDueDate() const 
+    {
         return dueDate;
     }
 
@@ -40,16 +44,19 @@ private:
 // Клас для списку задач
 class TaskList {
 public:
-    void addTask(const Task& task) {
+    void addTask(const Task& task) 
+    {
         tasks.push_back(task);
     }
 
-    void removeTask(const std::string& title) {
+    void removeTask(const std::string& title) 
+    {
         tasks.erase(std::remove_if(tasks.begin(), tasks.end(),
             [title](const Task& task) { return task.getTitle() == title; }), tasks.end());
     }
 
-    void updateTask(const std::string& title, const Task& newTask) {
+    void updateTask(const std::string& title, const Task& newTask)
+    {
         for (auto& task : tasks) {
             if (task.getTitle() == title) {
                 // Оновити задачу
@@ -112,12 +119,57 @@ private:
 class TaskFileHandler {
 public:
     void saveToFile(const TaskList& taskList, const std::string& filename) const {
-        // Збереження в файл
+        // Відкриття файлу для запису
+        std::ofstream file(filename);
+
+        if (!file.is_open()) {
+            std::cerr << "Помилка відкриття файлу для запису: " << filename << std::endl;
+            return;
+        }
+
+        // Отримання списку задач
+        std::vector<Task> tasks = taskList.getTasks();
+
+        // Запис кожної задачі у файл
+        for (const Task& task : tasks) {
+            file << task.getTitle() << std::endl;
+            file << task.getPriority() << std::endl;
+            file << task.getTag() << std::endl;
+            file << task.getDueDate() << std::endl;
+        }
+
+        // Закриття файлу
+        file.close();
     }
 
     TaskList loadFromFile(const std::string& filename) const {
         TaskList taskList;
-        // Завантаження з файлу
+
+        // Відкриття файлу для читання
+        std::ifstream file(filename);
+
+        if (!file.is_open()) {
+            std::cerr << "Помилка відкриття файлу для читання: " << filename << std::endl;
+            return taskList;
+        }
+
+        std::string title, tag, dueDate;
+        int priority;
+
+        // Читання задач з файлу та додавання їх до списку
+        while (getline(file, title)) {
+            file >> priority;
+            file.ignore(); // Ігноруємо перехід на новий рядок
+            getline(file, tag);
+            getline(file, dueDate);
+
+            Task task(title, priority, tag, dueDate);
+            taskList.addTask(task);
+        }
+
+        // Закриття файлу
+        file.close();
+
         return taskList;
     }
 };
